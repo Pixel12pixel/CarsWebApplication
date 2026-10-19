@@ -1,0 +1,17 @@
+<Solution>
+  <Project Path="Cars.API/Cars.API.csproj">
+    <BuildDependency Project="Cars.Application/Cars.Application.csproj" />
+    <BuildDependency Project="Cars.Contracts/Cars.Contracts.csproj" />
+    <BuildDependency Project="Cars.Infrastructure/Cars.Infrastructure.csproj" />
+  </Project>
+  <Project Path="Cars.Application/Cars.Application.csproj">
+    <BuildDependency Project="Cars.Domain/Cars.Domain.csproj" />
+  </Project>
+  <Project Path="Cars.Contracts/Cars.Contracts.csproj" />
+  <Project Path="Cars.Domain/Cars.Domain.csproj" />
+  <Project Path="Cars.Infrastructure/Cars.Infrastructure.csproj">
+    <BuildDependency Project="Cars.Application/Cars.Application.csproj" />
+    <BuildDependency Project="Cars.Domain/Cars.Domain.csproj" />
+  </Project>
+  <Project Path="Cars.Shared/Cars.Shared.csproj" />
+</Solution>
