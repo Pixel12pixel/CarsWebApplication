@@ -1,3 +1,4 @@
+using Cars.API.Middlewares;
 using Cars.Application;
 using Cars.Infrastructure;
 using Scalar.AspNetCore;
@@ -29,6 +30,8 @@ public static class Program
             app.MapScalarApiReference();
         }
 
+        app.UseMiddleware<ApiExceptionMiddleware>();
+        
         app.UseAuthorization();
 
 

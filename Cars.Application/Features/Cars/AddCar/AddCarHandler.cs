@@ -1,9 +1,9 @@
 
 using Cars.Application.Abstractions;
-using Cars.Application.Abstractions.Messaging;
 using Cars.Contracts.Cars;
 using Cars.Domain.Entities;
 using Cars.Shared.Common;
+using MediatR;
 
 namespace Cars.Application.Features.Cars.AddCar;
 
