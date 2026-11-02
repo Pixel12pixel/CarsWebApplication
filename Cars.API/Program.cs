@@ -34,6 +34,7 @@ public static class Program
         
         app.UseAuthorization();
 
+        app.UseCors("ReactApp");
 
         app.MapControllers();
         
