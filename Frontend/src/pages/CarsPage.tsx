@@ -8,10 +8,17 @@ import { carService } from "../Services/carService";
 import CarList from "../components/CarList";
 import Loading from "../components/Loading";
 
+import { useCarStore } from "../store/useCarStore";
+import CarFilters from "../components/CarFilters";
+
 export default function CarsPage() {
     const [cars, setCars] = useState<CarListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const removeFavorite = useCarStore(
+        (state) => state.removeFavorite
+    );
 
     const loadCars = async () => {
         try {
@@ -36,6 +43,7 @@ export default function CarsPage() {
         loadCars();
     }, []);
 
+
     const handleDelete = async (id: string) => {
         const confirmed = window.confirm(
             "Czy na pewno chcesz usunąć ten samochód?"
@@ -49,16 +57,18 @@ export default function CarsPage() {
             setCars(prev =>
                 prev.filter(car => {
                     const match = car.match(/^\(([^,]+)/);
-
                     return match?.[1].trim() !== id;
                 })
             );
+
+            removeFavorite(id);
 
             setError("");
         } catch {
             setError("Nie udało się usunąć samochodu.");
         }
     };
+
 
     if (loading) {
         return <Loading message="Pobieranie samochodów..." />;
@@ -81,10 +91,14 @@ export default function CarsPage() {
             {cars.length === 0 ? (
                 <p>Brak samochodów w bazie danych.</p>
             ) : (
-                <CarList
-                    cars={cars}
-                    onDelete={handleDelete}
-                />
+                <>
+                    <CarFilters />
+
+                    <CarList
+                        cars={cars}
+                        onDelete={handleDelete}
+                    />
+                </>
             )}
         </div>
     );

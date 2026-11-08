@@ -1,66 +1,55 @@
-﻿import type {Car, CarListItem, CarRequest} from "../models/Car";
+﻿import axios from 'axios';
+import type { Car, CarListItem, CarRequest } from "../models/Car";
 
-const API_URL = `http://localhost:5213/api/Cars`;
+const api = axios.create({
+    baseURL: "http://localhost:5213/api/Cars",
+    timeout: 1000,
+    headers: {
+        "Content-Type": "application/json"
+    }
+});
 
 export const carService = {
 
     async getAll(): Promise<CarListItem[]> {
-        const response = await fetch(API_URL);
-
-        if (!response.ok) {
-            throw new Error("Nie udało się pobrać samochodów");
+        try {
+            const response = await api.get<{ cars: CarListItem[] }>('');
+            return response.data.cars;
+        } catch (error) {
+            throw new Error("Nie udało się pobrać samochodów", { cause: error });
         }
-
-        const data: { cars: string[] } = await response.json();
-
-        return data.cars;
     },
 
     async getById(id: string): Promise<Car> {
-        const response = await fetch(`${API_URL}/${id}`);
-
-        if (!response.ok) {
-            throw new Error("Nie znaleziono samochodu");
+        try {
+            const response = await api.get<Car>(`/${id}`);
+            return response.data;
+        } catch (error) {
+            throw new Error("Nie znaleziono samochodu", { cause: error });
         }
-
-        return response.json();
     },
 
     async create(car: CarRequest): Promise<void> {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(car)
-        });
-
-        if (!response.ok) {
-            throw new Error("Nie udało się dodać samochodu");
+        try {
+            await api.post('', car);
+        } catch (error) {
+            throw new Error("Nie udało się dodać samochodu", { cause: error });
         }
     },
 
     async update(id: string, car: CarRequest): Promise<void> {
-        const response = await fetch(`${API_URL}/${id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(car)
-        });
-
-        if (!response.ok) {
-            throw new Error("Nie udało się edytować samochodu");
+        try {
+            await api.put(`/${id}`, car);
+        } catch (error) {
+            throw new Error("Nie udało się edytować samochodu", { cause: error });
         }
     },
 
     async delete(id: string): Promise<void> {
-        const response = await fetch(`${API_URL}/${id}`, {
-            method: "DELETE"
-        });
-
-        if (!response.ok) {
-            throw new Error("Nie udało się usunąć samochodu");
+        try {
+            await api.delete(`/${id}`);
+        } catch (error) {
+            throw new Error("Nie udało się usunąć samochodu", { cause: error });
         }
     }
 };

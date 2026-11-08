@@ -10,6 +10,7 @@ import "/styles/style.css";
 import AddCarPage from "./pages/AddCarPage.tsx";
 import CarDetailsPage from "./pages/CarDetailsPage.tsx";
 import EditCarPage from "./pages/EditCarPage.tsx";
+import FavoritesPage from "./pages/FavouritesPage.tsx";
 
 export default function App() {
     return (
@@ -23,6 +24,8 @@ export default function App() {
                     <Route path=":id" element={<CarDetailsPage />} />
                     <Route path=":id/edit" element={<EditCarPage />} />
                 </Route>
+
+                <Route path="favorites" element={<FavoritesPage />} />
 
                 <Route path="*" element={<NotFoundPage />} />
             </Route>

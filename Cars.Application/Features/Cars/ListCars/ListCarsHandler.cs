@@ -19,7 +19,7 @@ public class ListCarsHandler : IRequestHandler<ListCarsQuery, Result<ListCarsRes
     public async Task<Result<ListCarsResponse>> Handle(ListCarsQuery request, CancellationToken cancellationToken)
     {
         var cars = await _carsRepository.GetAllCarsAsync(cancellationToken);
-        var carList = cars.Select(c => (c.Id.ToString(), c.Model.ToString()).ToString()).ToList();
+        var carList = cars.Select(c => (c.Id.ToString(), c.Model.ToString(), c.Brand.ToString()).ToString()).ToList();
         var listCarsResponse = new ListCarsResponse(carList);
         return Result<ListCarsResponse>.Success(listCarsResponse);
     }

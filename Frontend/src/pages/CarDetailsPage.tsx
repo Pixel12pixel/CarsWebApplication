@@ -7,8 +7,18 @@ import { carService } from "../Services/carService";
 
 import Loading from "../components/Loading";
 
+import { useCarStore } from "../store/useCarStore";
+
 export default function CarDetailsPage() {
     const { id } = useParams<{ id: string }>();
+
+    const favoriteIds = useCarStore(
+        (state) => state.favoriteIds
+    );
+
+    const toggleFavorite = useCarStore(
+        (state) => state.toggleFavorite
+    );
 
     const [car, setCar] = useState<Car | null>(null);
     const [loading, setLoading] = useState(true);
@@ -55,6 +65,15 @@ export default function CarDetailsPage() {
                 <strong>Średnie zużycie paliwa:</strong>{" "}
                 {car.averageFuelConsumption}
             </p>
+
+            <button
+                onClick={() => toggleFavorite(car.id)}
+                className="primary-btn"
+            >
+                {favoriteIds.includes(car.id)
+                    ? "Usuń z ulubionych"
+                    : "Dodaj do ulubionych"}
+            </button>
 
             <Link
                 to={`/cars/${car.id}/edit`}
