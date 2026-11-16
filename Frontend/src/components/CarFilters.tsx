@@ -1,5 +1,4 @@
 ﻿
-
 import { useCarStore } from "../store/useCarStore";
 
 export default function CarFilters() {
@@ -7,16 +6,16 @@ export default function CarFilters() {
         (state) => state.searchTerm
     );
 
-    const onlyFavorites = useCarStore(
-        (state) => state.onlyFavorites
+    const showFavoritesOnly = useCarStore(
+        (state) => state.showFavoritesOnly
     );
 
     const setSearchTerm = useCarStore(
         (state) => state.setSearchTerm
     );
 
-    const toggleOnlyFavorites = useCarStore(
-        (state) => state.toggleOnlyFavorites
+    const setShowFavoritesOnly = useCarStore(
+        (state) => state.setShowFavoritesOnly
     );
 
     return (
@@ -33,8 +32,10 @@ export default function CarFilters() {
             <label>
                 <input
                     type="checkbox"
-                    checked={onlyFavorites}
-                    onChange={toggleOnlyFavorites}
+                    checked={showFavoritesOnly}
+                    onChange={(e) =>
+                        setShowFavoritesOnly(e.target.checked)
+                    }
                 />
 
                 Tylko ulubione

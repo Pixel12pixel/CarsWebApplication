@@ -1,6 +1,5 @@
-﻿
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+﻿import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import type { Car } from "../models/Car";
 import { carService } from "../Services/carService";
@@ -8,16 +7,24 @@ import { carService } from "../Services/carService";
 import Loading from "../components/Loading";
 
 import { useCarStore } from "../store/useCarStore";
+import { useAuthStore } from "../store/useAuthStore";
+
+const EMPTY_FAVORITE_CAR_IDS: string[] = [];
 
 export default function CarDetailsPage() {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    const user = useAuthStore((state) => state.user);
+    const isAdmin = user?.roles.includes("Admin") ?? false;
 
-    const favoriteIds = useCarStore(
-        (state) => state.favoriteIds
+    const favoriteCarIds = useCarStore((state) =>
+        user
+            ? state.favoriteCarIdsByUser[user.id] ?? EMPTY_FAVORITE_CAR_IDS
+            : EMPTY_FAVORITE_CAR_IDS,
     );
 
     const toggleFavorite = useCarStore(
-        (state) => state.toggleFavorite
+        (state) => state.toggleFavorite,
     );
 
     const [car, setCar] = useState<Car | null>(null);
@@ -25,10 +32,16 @@ export default function CarDetailsPage() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (!id) return;
+        if (!id) {
+            setLoading(false);
+            return;
+        }
 
         const loadCar = async () => {
             try {
+                setLoading(true);
+                setError("");
+
                 const data = await carService.getById(id);
                 setCar(data);
             } catch {
@@ -46,8 +59,29 @@ export default function CarDetailsPage() {
     }
 
     if (error || !car) {
-        return <p className="error">{error || "Nie znaleziono samochodu."}</p>;
+        return (
+            <p className="error">
+                {error || "Nie znaleziono samochodu."}
+            </p>
+        );
     }
+
+    const isFavorite = favoriteCarIds.includes(car.id);
+
+    const handleDelete = async () => {
+        const confirmed = window.confirm(
+            "Czy na pewno chcesz usunąć ten samochód?",
+        );
+
+        if (!confirmed) return;
+
+        try {
+            await carService.delete(car.id);
+            navigate("/cars");
+        } catch {
+            setError("Nie udało się usunąć samochodu.");
+        }
+    };
 
     return (
         <div className="details">
@@ -66,14 +100,21 @@ export default function CarDetailsPage() {
                 {car.averageFuelConsumption}
             </p>
 
-            <button
-                onClick={() => toggleFavorite(car.id)}
-                className="primary-btn"
-            >
-                {favoriteIds.includes(car.id)
-                    ? "Usuń z ulubionych"
-                    : "Dodaj do ulubionych"}
-            </button>
+            {user && (
+                <button
+                    type="button"
+                    onClick={() => {
+                        if (user) {
+                            toggleFavorite(user.id, car.id);
+                        }
+                    }}
+                    className="primary-btn"
+                >
+                    {isFavorite
+                        ? "Usuń z ulubionych"
+                        : "Dodaj do ulubionych"}
+                </button>
+            )}
 
             <Link
                 to={`/cars/${car.id}/edit`}
@@ -81,6 +122,16 @@ export default function CarDetailsPage() {
             >
                 Edytuj
             </Link>
+
+            {isAdmin && (
+                <button
+                    type="button"
+                    className="delete-btn"
+                    onClick={handleDelete}
+                >
+                    Usuń
+                </button>
+            )}
 
             <Link to="/cars" className="secondary-btn">
                 Powrót do listy

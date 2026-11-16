@@ -1,5 +1,4 @@
-﻿
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import type { CarListItem } from "../models/Car";
@@ -7,17 +6,19 @@ import { carService } from "../Services/carService";
 
 import CarList from "../components/CarList";
 import Loading from "../components/Loading";
+import CarFilters from "../components/CarFilters";
 
 import { useCarStore } from "../store/useCarStore";
-import CarFilters from "../components/CarFilters";
+import { useAuthStore } from "../store/useAuthStore";
 
 export default function CarsPage() {
     const [cars, setCars] = useState<CarListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    const user = useAuthStore((state) => state.user);
     const removeFavorite = useCarStore(
-        (state) => state.removeFavorite
+        (state) => state.removeFavorite,
     );
 
     const loadCars = async () => {
@@ -26,13 +27,12 @@ export default function CarsPage() {
             setError("");
 
             const data = await carService.getAll();
-
             setCars(data);
         } catch (err) {
             setError(
                 err instanceof Error
                     ? err.message
-                    : "Nie udało się pobrać samochodów."
+                    : "Nie udało się pobrać samochodów.",
             );
         } finally {
             setLoading(false);
@@ -43,10 +43,9 @@ export default function CarsPage() {
         loadCars();
     }, []);
 
-
     const handleDelete = async (id: string) => {
         const confirmed = window.confirm(
-            "Czy na pewno chcesz usunąć ten samochód?"
+            "Czy na pewno chcesz usunąć ten samochód?",
         );
 
         if (!confirmed) return;
@@ -54,21 +53,22 @@ export default function CarsPage() {
         try {
             await carService.delete(id);
 
-            setCars(prev =>
-                prev.filter(car => {
+            setCars((prev) =>
+                prev.filter((car) => {
                     const match = car.match(/^\(([^,]+)/);
                     return match?.[1].trim() !== id;
-                })
+                }),
             );
 
-            removeFavorite(id);
+            if (user) {
+                removeFavorite(user.id, id);
+            }
 
             setError("");
         } catch {
             setError("Nie udało się usunąć samochodu.");
         }
     };
-
 
     if (loading) {
         return <Loading message="Pobieranie samochodów..." />;
@@ -84,9 +84,7 @@ export default function CarsPage() {
                 </Link>
             </div>
 
-            {error && (
-                <p className="error">{error}</p>
-            )}
+            {error && <p className="error">{error}</p>}
 
             {cars.length === 0 ? (
                 <p>Brak samochodów w bazie danych.</p>

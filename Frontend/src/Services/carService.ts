@@ -1,19 +1,13 @@
-﻿import axios from 'axios';
+﻿
 import type { Car, CarListItem, CarRequest } from "../models/Car";
 
-const api = axios.create({
-    baseURL: "http://localhost:5213/api/Cars",
-    timeout: 1000,
-    headers: {
-        "Content-Type": "application/json"
-    }
-});
+import {apiClient} from "../api/apiClient.ts";
 
 export const carService = {
 
     async getAll(): Promise<CarListItem[]> {
         try {
-            const response = await api.get<{ cars: CarListItem[] }>('');
+            const response = await apiClient.get<{ cars: CarListItem[] }>('/Cars');
             return response.data.cars;
         } catch (error) {
             throw new Error("Nie udało się pobrać samochodów", { cause: error });
@@ -22,7 +16,7 @@ export const carService = {
 
     async getById(id: string): Promise<Car> {
         try {
-            const response = await api.get<Car>(`/${id}`);
+            const response = await apiClient.get<Car>(`/Cars/${id}`);
             return response.data;
         } catch (error) {
             throw new Error("Nie znaleziono samochodu", { cause: error });
@@ -31,7 +25,7 @@ export const carService = {
 
     async create(car: CarRequest): Promise<void> {
         try {
-            await api.post('', car);
+            await apiClient.post('/Cars', car);
         } catch (error) {
             throw new Error("Nie udało się dodać samochodu", { cause: error });
         }
@@ -39,7 +33,7 @@ export const carService = {
 
     async update(id: string, car: CarRequest): Promise<void> {
         try {
-            await api.put(`/${id}`, car);
+            await apiClient.put(`/Cars/${id}`, car);
         } catch (error) {
             throw new Error("Nie udało się edytować samochodu", { cause: error });
         }
@@ -47,7 +41,7 @@ export const carService = {
 
     async delete(id: string): Promise<void> {
         try {
-            await api.delete(`/${id}`);
+            await apiClient.delete(`/Cars/${id}`);
         } catch (error) {
             throw new Error("Nie udało się usunąć samochodu", { cause: error });
         }

@@ -1,7 +1,7 @@
-﻿
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import type { CarListItem } from "../models/Car";
 import { useCarStore } from "../store/useCarStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 interface Props {
     cars: CarListItem[];
@@ -9,26 +9,28 @@ interface Props {
 }
 
 export default function CarList({ cars, onDelete }: Props) {
-    const searchTerm = useCarStore(
-        (state) => state.searchTerm
-    );
+    const user = useAuthStore((state) => state.user);
+    const isAdmin = user?.roles.includes("Admin") ?? false;
 
-    const onlyFavorites = useCarStore(
-        (state) => state.onlyFavorites
+    const searchTerm = useCarStore((state) => state.searchTerm);
+    const showFavoritesOnly = useCarStore(
+        (state) => state.showFavoritesOnly,
     );
-
-    const favoriteIds = useCarStore(
-        (state) => state.favoriteIds
+    const favoriteCarIdsByUser = useCarStore(
+        (state) => state.favoriteCarIdsByUser,
     );
-
     const toggleFavorite = useCarStore(
-        (state) => state.toggleFavorite
+        (state) => state.toggleFavorite,
     );
+
+    const favoriteCarIds = user
+        ? favoriteCarIdsByUser[user.id] ?? []
+        : [];
 
     const filteredCars = cars
         .map((car) => {
             const match = car.match(
-                /^\(([^,]+),\s*([^,]+),\s*(.*)\)$/
+                /^\(([^,]+),\s*([^,]+),\s*(.*)\)$/,
             );
 
             if (!match) return null;
@@ -36,7 +38,7 @@ export default function CarList({ cars, onDelete }: Props) {
             return {
                 id: match[1].trim(),
                 model: match[2].trim(),
-                brand: match[3].trim()
+                brand: match[3].trim(),
             };
         })
         .filter((car) => {
@@ -49,8 +51,8 @@ export default function CarList({ cars, onDelete }: Props) {
                 car.brand.toLowerCase().includes(search);
 
             const matchesFavorites =
-                !onlyFavorites ||
-                favoriteIds.includes(car.id);
+                !showFavoritesOnly ||
+                favoriteCarIds.includes(car.id);
 
             return matchesSearch && matchesFavorites;
         });
@@ -69,8 +71,7 @@ export default function CarList({ cars, onDelete }: Props) {
             {filteredCars.map((car) => {
                 if (!car) return null;
 
-                const isFavorite =
-                    favoriteIds.includes(car.id);
+                const isFavorite = favoriteCarIds.includes(car.id);
 
                 return (
                     <tr key={car.id}>
@@ -80,9 +81,13 @@ export default function CarList({ cars, onDelete }: Props) {
 
                         <td>
                             <button
-                                onClick={() =>
-                                    toggleFavorite(car.id)
-                                }
+                                type="button"
+                                disabled={!user}
+                                onClick={() => {
+                                    if (user) {
+                                        toggleFavorite(user.id, car.id);
+                                    }
+                                }}
                                 title={
                                     isFavorite
                                         ? "Usuń z ulubionych"
@@ -102,14 +107,15 @@ export default function CarList({ cars, onDelete }: Props) {
                                 Edytuj
                             </Link>
 
-                            <button
-                                className="delete-btn"
-                                onClick={() =>
-                                    onDelete(car.id)
-                                }
-                            >
-                                Usuń
-                            </button>
+                            {isAdmin && (
+                                <button
+                                    type="button"
+                                    className="delete-btn"
+                                    onClick={() => onDelete(car.id)}
+                                >
+                                    Usuń
+                                </button>
+                            )}
                         </td>
                     </tr>
                 );

@@ -5,6 +5,7 @@ using Cars.Application.Features.Cars.RemoveCar;
 using Cars.Application.Features.Cars.UpdateCar;
 using Cars.Contracts.Cars;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using IMediator = Cars.Application.Abstractions.Messaging.IMediator;
 
@@ -12,6 +13,7 @@ namespace Cars.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CarsController : ControllerBase
 {
     private readonly ISender _mediator;
@@ -101,6 +103,7 @@ public class CarsController : ControllerBase
         }
     }
     
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteCar([FromRoute] string id)
     {

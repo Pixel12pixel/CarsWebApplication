@@ -17,7 +17,7 @@ public static class Program
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 
-        builder.Services.AddApplication();
+        builder.Services.AddApplication(builder.Configuration);
         builder.Services.AddPresentation(builder.Configuration);
         builder.Services.AddInfrastructure(builder.Configuration);
         

@@ -1,6 +1,7 @@
 
 using Cars.Application.Abstractions;
 using Cars.Infrastructure.Repositories;
+using Cars.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,12 @@ public static class DependencyInjection
 
         var seed = new Seed();
         seed.SeedData(services.BuildServiceProvider().GetRequiredService<DataContext>()).GetAwaiter().GetResult();
+
+        //IdentitySeed.SeedAsync(services.BuildServiceProvider()).GetAwaiter().GetResult();
+
+        services.AddScoped<ITokenService, TokenService>();
+        
+        services.AddScoped<IEmailService, EmailService>();
         
         return services;
     }
